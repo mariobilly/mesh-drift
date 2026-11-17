@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mesh Drift</title>
+<link rel="icon" type="image/png" href="icon.png">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand"><i data-i="logo"></i><span>MESH DRIFT</span></div>
+  <div class="vsep"></div>
+  <label class="ws"><span class="muted">Workspace</span><input id="docName" value="Untitled gradient" spellcheck="false" maxlength="80" aria-label="Gradient name"></label>
+  <div class="grow"></div>
+  <div class="palette-name mono" id="paletteName" title="Palette">—</div>
+</header>
+
+<nav class="toolbar" aria-label="Tools">
+  <button id="btnUndo" title="Undo (Ctrl+Z)"><i data-i="undo"></i>Undo</button>
+  <button id="btnRedo" title="Redo (Ctrl+Shift+Z)"><i data-i="redo"></i>Redo</button>
+  <button id="btnNew" class="boxed" title="New gradient (N)"><i data-i="plus"></i>New Gradient</button>
+  <button id="btnPlay" title="Play / pause (Space)"><i data-i="pause"></i><span>Pause</span></button>
+  <div class="vsep"></div>
+  <div class="menu-wrap">
+    <button id="btnFormat" aria-haspopup="true"><i data-i="format"></i>Canvas Format<i data-i="chev" class="chev"></i></button>
+    <div class="menu" id="menuFormat" hidden></div>
+  </div>
+  <button id="btnEdit" class="active" title="Show and move the colour points (H)"><i data-i="sliders"></i>Edit Points</button>
+  <div class="menu-wrap">
+    <button id="btnTemplates" aria-haspopup="true" title="Template pack"><i data-i="grid"></i>Templates</button>
+    <div class="menu menu-grid" id="menuTemplates" hidden></div>
+  </div>
+  <div class="menu-wrap">
+    <button id="btnRecent" aria-haspopup="true" title="Recent gradients"><i data-i="clock"></i>Recent</button>
+    <div class="menu menu-grid" id="menuRecent" hidden></div>
+  </div>
+  <button id="btnHelp" class="icon-only" title="Shortcuts (?)" aria-label="Help"><i data-i="help"></i></button>
+</nav>
+
+<main class="workspace">
+  <section class="panel canvas-panel">
+    <div class="panel-head">
+      <span class="label">CANVAS</span>
+      <span class="grow"></span>
+      <span class="label live"><i class="dot"></i>LIVE RENDER&nbsp;&nbsp;<span id="liveSize">900 × 1440</span></span>
+      <span class="label dim" id="fmtLabel">PORTRAIT</span>
+    </div>
+    <div class="stage" id="stage">
+      <div class="frame" id="frame">
+        <canvas id="view"></canvas>
+        <div class="handles" id="handles"></div>
+      </div>
+      <div class="gl-error" id="glError" hidden></div>
+    </div>
+    <div class="panel-foot">
+      <span class="label dim" id="hint">DOUBLE CLICK TO ADD A POINT</span>
+      <span class="label dim" id="meta">0 COLOR POINTS · SEED —</span>
+      <span class="grow"></span>
+      <button class="foot-btn" id="btnHide"><i data-i="eye"></i><span>Hide points</span></button>
+      <button class="foot-btn" id="btnPrev" title="Restore the previous gradient"><i data-i="restore"></i><span>Previous</span></button>
+    </div>
+  </section>
+
+  <aside class="panel side">
+    <div class="panel-head">
+      <span class="title">Adjustments</span>
+      <span class="grow"></span>
+      <span class="label dim" id="ptCount">00 POINTS</span>
+    </div>
+    <div class="tabs" role="tablist">
+      <button role="tab" data-tab="colors" class="on">Colors</button>
+      <button role="tab" data-tab="shape">Shape</button>
+      <button role="tab" data-tab="motion">Motion</button>
+      <button role="tab" data-tab="finish">Finish</button>
+    </div>
+    <div class="tab-body">
+      <div class="tab" data-tab="colors">
+        <div class="sec">
+          <div class="sec-head"><h4>Color points</h4><span class="label dim">CLICK TO SELECT</span></div>
+          <div class="pt-list" id="ptList"></div>
+          <button class="wide" id="btnRandColors"><i data-i="shuffle"></i>Randomize colors</button>
+        </div>
+        <div class="sec" id="selSec">
+          <div class="sec-head"><h4>Selected point</h4><span class="label dim" id="selIdx">01 / 05</span></div>
+          <div class="field-label">Color</div>
+          <div class="color-row">
+            <button class="swatch-btn" id="selSwatch" title="Open the colour picker"></button>
+            <input class="hex mono" id="selHex" maxlength="7" spellcheck="false" aria-label="Hex colour">
+            <button class="icon-btn" id="selLock" title="Lock this point (L): it keeps its colour and place on New Gradient"><i data-i="unlock"></i></button>
+            <button class="icon-btn" id="selDelete" title="Delete this point (Del)"><i data-i="trash"></i></button>
+          </div>
+          <div id="pickerBox" hidden></div>
+          <div class="field-label">Quick colors</div>
+          <div class="quick" id="quick"></div>
+          <div id="slPoint"></div>
+        </div>
+      </div>
+
+      <div class="tab" data-tab="shape" hidden>
+        <div class="sec">
+          <h4>Composition</h4>
+          <p class="desc">The spatial character of your gradient.</p>
+          <div id="slShape"></div>
+          <details class="adv"><summary>Advanced shape</summary><div id="slShapeAdv"></div></details>
+        </div>
+        <div class="sec">
+          <h4>Generate variation</h4>
+          <p class="desc">Change the arrangement while keeping your colors. Locked points stay put.</p>
+          <button class="wide" id="btnVariation"><i data-i="wand"></i>Generate variation</button>
+        </div>
+      </div>
+
+      <div class="tab" data-tab="motion" hidden>
+        <div class="sec">
+          <h4>Motion mode</h4>
+          <p class="desc">Add movement to the atmosphere.</p>
+          <div class="modes" id="modes"></div>
+        </div>
+        <div class="sec">
+          <div class="sec-head"><h4>Timing &amp; movement</h4><button class="link" id="btnRandMotion"><i data-i="shuffle"></i>Randomize motion</button></div>
+          <div id="slMotion"></div>
+          <p class="desc note">Animation loops seamlessly. Press Space to preview or pause.</p>
+        </div>
+      </div>
+
+      <div class="tab" data-tab="finish" hidden>
+        <div class="sec">
+          <h4>Texture</h4>
+          <p class="desc">Film grain gives flat gradients a printed, tactile feel.</p>
+          <div id="slFinishTex"></div>
+          <label class="toggle"><input type="checkbox" id="animGrain"><span></span>Animated grain</label>
+        </div>
+        <div class="sec">
+          <h4>Tone</h4>
+          <div id="slFinishTone"></div>
+          <div id="slFinishVig"></div>
+          <button class="wide" id="btnResetFinish"><i data-i="restore"></i>Reset finish</button>
+        </div>
+      </div>
+    </div>
+    <div class="side-foot">
+      <button class="export-btn" id="btnExport"><i data-i="download"></i>Export Gradient<span class="kbd">E</span></button>
+      <div class="label dim center">LOCAL FILE · NO UPLOAD</div>
+    </div>
+  </aside>
+</main>
+
+<div class="modal" id="exportModal" hidden>
+  <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="exTitle">
+    <div class="dlg-head"><h3 id="exTitle">Export gradient</h3><button class="icon-btn" id="exClose" aria-label="Close"><i data-i="x"></i></button></div>
+    <div class="dlg-body">
+      <div class="field-label">File type</div>
+      <div class="seg" id="exType">
+        <button data-v="png">PNG</button><button data-v="webp">WEBP</button><button data-v="jpg">JPEG</button><button data-v="webm">WEBM</button><button data-v="mp4">MP4</button>
+      </div>
+      <div id="exImage">
+        <div class="two">
+          <label><span class="field-label">Width (px)</span><input class="num mono" id="exW" inputmode="numeric"></label>
+          <label><span class="field-label">Height (px)</span><input class="num mono" id="exH" inputmode="numeric"></label>
+        </div>
+        <div class="field-label">Resolution multiplier</div>
+        <div class="seg" id="exMult"><button data-v="1">1×</button><button data-v="2">2×</button><button data-v="4">4×</button></div>
+        <p class="desc" id="exOut">Output: 900 × 1440 px. Maximum edge 4096 px.</p>
+      </div>
+      <div id="exVideo" hidden>
+        <div class="row-between"><span class="field-label">Video size</span><span class="mono" id="exVSize">1920 × 1080</span></div>
+        <div class="seg" id="exVRes"><button data-v="hd">HD</button><button data-v="qhd">2K</button><button data-v="4k">4K</button></div>
+        <p class="desc">Seamless loop, rendered frame by frame at full resolution.</p>
+        <div class="field-label">Frame rate</div>
+        <div class="seg" id="exFps"><button data-v="30">30 FPS</button><button data-v="60">60 FPS</button></div>
+        <div class="field-label">Duration</div>
+        <div class="seg" id="exDur"><button data-v="3">3 SEC</button><button data-v="5">5 SEC</button><button data-v="10">10 SEC</button></div>
+        <p class="desc" id="exLoops"></p>
+      </div>
+      <div class="progress" id="exProg" hidden><div class="bar"><i id="exBar"></i></div><p class="desc" id="exStatus">Rendering 0%… Keep this window open.</p></div>
+      <p class="error" id="exError" hidden></p>
+    </div>
+    <div class="dlg-foot">
+      <button class="ghost" id="exCancel">Cancel</button>
+      <button class="primary" id="exGo"><i data-i="download"></i><span>Export PNG</span></button>
+    </div>
+    <div class="dlg-note label dim" id="exDest">SAVES TO YOUR OUTPUTS FOLDER</div>
+  </div>
+</div>
+
+<div class="modal" id="helpModal" hidden>
+  <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="hpTitle">
+    <div class="dlg-head"><h3 id="hpTitle">Shortcuts &amp; tips</h3><button class="icon-btn" data-close aria-label="Close"><i data-i="x"></i></button></div>
+    <div class="dlg-body help">
+      <dl>
+        <dt>N</dt><dd>New gradient: new seed, palette, arrangement and motion</dd>
+        <dt>Space</dt><dd>Play / pause the animation</dd>
+        <dt>V</dt><dd>Generate a variation (same colours)</dd>
+        <dt>C</dt><dd>Randomize colours</dd>
+        <dt>E</dt><dd>Export</dd>
+        <dt>H</dt><dd>Show / hide the colour points</dd>
+        <dt>L</dt><dd>Lock / unlock the selected point</dd>
+        <dt>[ &nbsp;]</dt><dd>Select the previous / next point</dd>
+        <dt>Del</dt><dd>Delete the selected point</dd>
+        <dt>Ctrl+Z</dt><dd>Undo &nbsp;·&nbsp; Ctrl+Shift+Z or Ctrl+Y: redo</dd>
+      </dl>
+      <p class="desc">Drag a point to move its colour. Double-click the canvas to add a point. Double-click a slider's name to reset it.
+        Locked points keep their colour and position when you press New Gradient, Randomize colors or Generate variation.
+        Every visit starts with a fresh gradient. The last one is in Recent, and Previous brings it back.</p>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" hidden><span id="toastMsg"></span><button class="link" id="toastBtn" hidden>Show in folder</button></div>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
