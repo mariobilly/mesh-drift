@@ -9,8 +9,12 @@ only Python itself, plus ffmpeg if you want MP4.
 Inspired by a gradient tool shown in a reel by [Daniil](https://www.instagram.com/reel/Dd2FvritqAG/). Mesh Drift is an
 independent project, not affiliated with that tool, and shares no code with it.
 
+![Mesh Drift](docs/screenshot.jpg)
+
 <!-- videos:start -->
 ## See it in action
+
+<p align="center"><a href="docs/videos/tutorial.mp4"><img src="docs/videos/tutorial.jpg" alt="How it works" width="640"></a><br><b>▶ <a href="docs/videos/tutorial.mp4">How it works</a></b> (0:59, narrated, with captions)</p>
 
 **Made with Mesh Drift: seamless loops in five of the six motion modes**
 
